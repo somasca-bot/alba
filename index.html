@@ -31,6 +31,18 @@
     <div id="summaryAmount" class="summary-amount">0원</div>
     <div id="payDate" class="pay-date"></div>
   </div>
+
+  <div class="summary-card">
+    <div class="summary-row">
+      <span class="summary-label">실제 입금 기록</span>
+    </div>
+    <div class="payment-inputs">
+      <input type="date" id="paidDateInput">
+      <input type="number" id="paidAmountInput" placeholder="입금액(원)">
+    </div>
+    <button id="savePaymentBtn" class="btn btn-primary">저장</button>
+    <div id="paymentDiff" class="pay-date"></div>
+  </div>
 </div>
 
 <div id="entryModal" class="modal hidden">

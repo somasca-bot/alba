@@ -1,5 +1,6 @@
 const WAGE_KEY = 'albacalc.wage';
 const ENTRIES_KEY = 'albacalc.entries';
+const PAYMENTS_KEY = 'albacalc.payments';
 const TAX_RATE = 0.033;
 
 const state = {
@@ -8,6 +9,7 @@ const state = {
   showNet: false,
   selectedDate: null,
   entries: loadEntries(),
+  payments: loadPayments(),
 };
 
 function loadEntries() {
@@ -20,6 +22,22 @@ function loadEntries() {
 
 function saveEntries() {
   localStorage.setItem(ENTRIES_KEY, JSON.stringify(state.entries));
+}
+
+function loadPayments() {
+  try {
+    return JSON.parse(localStorage.getItem(PAYMENTS_KEY)) || {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function savePayments() {
+  localStorage.setItem(PAYMENTS_KEY, JSON.stringify(state.payments));
+}
+
+function monthKey(y, m) {
+  return `${y}-${pad2(m + 1)}`;
 }
 
 function getDefaultWage() {
@@ -126,6 +144,7 @@ function renderCalendar() {
   });
 
   renderSummary();
+  renderPayment();
 }
 
 // ---------- Summary ----------
@@ -154,6 +173,47 @@ function renderSummary() {
 toggleNetBtn.addEventListener('click', () => {
   state.showNet = !state.showNet;
   renderSummary();
+});
+
+// ---------- Actual payment record ----------
+const paidDateInput = document.getElementById('paidDateInput');
+const paidAmountInput = document.getElementById('paidAmountInput');
+const paymentDiffEl = document.getElementById('paymentDiff');
+
+function renderPayment() {
+  const key = monthKey(state.year, state.month);
+  const record = state.payments[key];
+  paidDateInput.value = record ? record.date : '';
+  paidAmountInput.value = record && record.amount != null ? record.amount : '';
+
+  const prefix = `${state.year}-${pad2(state.month + 1)}-`;
+  let gross = 0;
+  Object.keys(state.entries).forEach((k) => {
+    if (k.startsWith(prefix)) gross += state.entries[k].gross;
+  });
+  const expectedNet = Math.floor(gross * (1 - TAX_RATE));
+
+  if (record && record.amount != null) {
+    const diff = record.amount - expectedNet;
+    if (diff === 0) {
+      paymentDiffEl.textContent = `예상 순액과 일치 (${formatWon(expectedNet)})`;
+    } else if (diff > 0) {
+      paymentDiffEl.textContent = `예상보다 ${formatWon(diff)} 더 입금됨 (예상 ${formatWon(expectedNet)})`;
+    } else {
+      paymentDiffEl.textContent = `예상보다 ${formatWon(-diff)} 적게 입금됨 (예상 ${formatWon(expectedNet)})`;
+    }
+  } else {
+    paymentDiffEl.textContent = `예상 순액: ${formatWon(expectedNet)}`;
+  }
+}
+
+document.getElementById('savePaymentBtn').addEventListener('click', () => {
+  const key = monthKey(state.year, state.month);
+  const date = paidDateInput.value;
+  const amount = parseInt(paidAmountInput.value, 10);
+  state.payments[key] = { date, amount: Number.isFinite(amount) ? amount : null };
+  savePayments();
+  renderPayment();
 });
 
 // ---------- Month navigation ----------
