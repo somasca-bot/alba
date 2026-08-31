@@ -189,7 +189,7 @@ function openEntryModal(y, m, d) {
     endTimeInput.value = existing.end;
     deleteEntryBtn.classList.remove('hidden');
   } else if (weekday === 0) {
-    startTimeInput.value = '09:00';
+    startTimeInput.value = '09:50';
     endTimeInput.value = '17:00';
     deleteEntryBtn.classList.add('hidden');
   } else {
