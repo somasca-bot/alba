@@ -150,7 +150,6 @@ function renderCalendar() {
 // ---------- Summary ----------
 const summaryAmountEl = document.getElementById('summaryAmount');
 const summaryLabelEl = document.getElementById('summaryLabel');
-const payDateEl = document.getElementById('payDate');
 const toggleNetBtn = document.getElementById('toggleNet');
 
 function renderSummary() {
@@ -164,10 +163,6 @@ function renderSummary() {
   summaryAmountEl.textContent = formatWon(amount);
   summaryLabelEl.textContent = state.showNet ? '이번 달 급여 (3.3% 공제 후)' : '이번 달 급여 (공제 전)';
   toggleNetBtn.textContent = state.showNet ? '공제 전 금액 보기' : '3.3% 공제 후 보기';
-
-  let payYear = state.year, payMonth = state.month + 1;
-  if (payMonth > 11) { payMonth = 0; payYear += 1; } else { payMonth += 1; }
-  payDateEl.textContent = `입금 예정일: ${payYear}년 ${payMonth}월 10일`;
 }
 
 toggleNetBtn.addEventListener('click', () => {
