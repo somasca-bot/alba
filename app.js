@@ -174,6 +174,7 @@ toggleNetBtn.addEventListener('click', () => {
 const paidDateInput = document.getElementById('paidDateInput');
 const paidAmountInput = document.getElementById('paidAmountInput');
 const paymentDiffEl = document.getElementById('paymentDiff');
+const paymentLabelEl = document.getElementById('paymentLabel');
 
 function renderPayment() {
   const key = monthKey(state.year, state.month);
@@ -181,7 +182,13 @@ function renderPayment() {
   paidDateInput.value = record ? record.date : '';
   paidAmountInput.value = record && record.amount != null ? record.amount : '';
 
-  const prefix = `${state.year}-${pad2(state.month + 1)}-`;
+  // 급여는 근무한 달의 다음 달에 입금되므로, 이번에 보이는 달 = 전달 근무분 입금월
+  let workMonthNum = state.month; // 0-indexed 현재월 == 전달의 1-indexed 월 번호
+  let workYear = state.year;
+  if (state.month === 0) { workMonthNum = 12; workYear = state.year - 1; }
+  paymentLabelEl.textContent = `실제 입금 기록 (${workYear}년 ${workMonthNum}월 급여)`;
+
+  const prefix = `${workYear}-${pad2(workMonthNum)}-`;
   let gross = 0;
   Object.keys(state.entries).forEach((k) => {
     if (k.startsWith(prefix)) gross += state.entries[k].gross;
