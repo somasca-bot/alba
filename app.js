@@ -42,7 +42,7 @@ function monthKey(y, m) {
 
 function getDefaultWage() {
   const v = parseInt(localStorage.getItem(WAGE_KEY), 10);
-  return Number.isFinite(v) && v > 0 ? v : 13000;
+  return Number.isFinite(v) && v > 0 ? v : 0;
 }
 
 function setDefaultWage(v) {
@@ -311,7 +311,8 @@ const settingsModal = document.getElementById('settingsModal');
 const wageInput = document.getElementById('wageInput');
 
 document.getElementById('settingsBtn').addEventListener('click', () => {
-  wageInput.value = getDefaultWage();
+  const wage = getDefaultWage();
+  wageInput.value = wage > 0 ? wage : '';
   settingsModal.classList.remove('hidden');
 });
 document.getElementById('cancelSettingsBtn').addEventListener('click', () => {
@@ -331,3 +332,8 @@ if ('serviceWorker' in navigator) {
 }
 
 renderCalendar();
+
+if (getDefaultWage() === 0) {
+  wageInput.value = '';
+  settingsModal.classList.remove('hidden');
+}
