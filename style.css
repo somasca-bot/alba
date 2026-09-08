@@ -222,6 +222,22 @@ html, body {
   margin-bottom: 6px;
 }
 
+.report-block {
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+.report-text {
+  background: rgba(99,102,241,0.12);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
 .hint {
   font-size: 0.72rem;
   color: var(--muted);

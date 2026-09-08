@@ -1,4 +1,4 @@
-const CACHE_NAME = 'albacalc-v6';
+const CACHE_NAME = 'albacalc-v7';
 const ASSETS = [
   './',
   './index.html',

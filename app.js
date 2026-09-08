@@ -79,6 +79,23 @@ function formatHM(minutes) {
   return `${h}시간 ${m}분`;
 }
 
+const WEEKDAY_KR = ['일', '월', '화', '수', '목', '금', '토'];
+
+function generateReportText(y, m, d) {
+  const key = dateKey(y, m, d);
+  const entry = state.entries[key];
+  if (!entry) return '';
+
+  const weekday = WEEKDAY_KR[new Date(y, m, d).getDay()];
+  const prefix = `${y}-${pad2(m + 1)}-`;
+  let cumulative = 0;
+  Object.keys(state.entries)
+    .filter((k) => k.startsWith(prefix) && k <= key)
+    .forEach((k) => { cumulative += state.entries[k].minutes; });
+
+  return `${m + 1}/${d}(${weekday})\n${entry.start} ~ ${entry.end} = ${formatHM(entry.minutes)}\n누적 ${formatHM(cumulative)}`;
+}
+
 // ---------- Calendar rendering ----------
 const monthLabel = document.getElementById('monthLabel');
 const calendarEl = document.getElementById('calendar');
@@ -237,6 +254,9 @@ const startTimeInput = document.getElementById('startTime');
 const endTimeInput = document.getElementById('endTime');
 const entryPreview = document.getElementById('entryPreview');
 const deleteEntryBtn = document.getElementById('deleteEntryBtn');
+const reportBlock = document.getElementById('reportBlock');
+const reportTextEl = document.getElementById('reportText');
+const copyReportBtn = document.getElementById('copyReportBtn');
 
 function openEntryModal(y, m, d) {
   const key = dateKey(y, m, d);
@@ -261,8 +281,27 @@ function openEntryModal(y, m, d) {
   }
 
   updatePreview();
+  updateReportBlock(y, m, d);
   entryModal.classList.remove('hidden');
 }
+
+function updateReportBlock(y, m, d) {
+  const key = dateKey(y, m, d);
+  if (state.entries[key]) {
+    reportTextEl.textContent = generateReportText(y, m, d);
+    reportBlock.classList.remove('hidden');
+  } else {
+    reportBlock.classList.add('hidden');
+  }
+}
+
+copyReportBtn.addEventListener('click', () => {
+  const text = reportTextEl.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    copyReportBtn.textContent = '복사됨!';
+    setTimeout(() => { copyReportBtn.textContent = '문구 복사하기'; }, 1500);
+  });
+});
 
 function updatePreview() {
   const start = startTimeInput.value;
@@ -295,8 +334,11 @@ document.getElementById('saveEntryBtn').addEventListener('click', () => {
 
   state.entries[state.selectedDate] = { start, end, wage, minutes, gross };
   saveEntries();
-  entryModal.classList.add('hidden');
   renderCalendar();
+
+  const [ky, km, kd] = state.selectedDate.split('-').map(Number);
+  deleteEntryBtn.classList.remove('hidden');
+  updateReportBlock(ky, km - 1, kd);
 });
 
 deleteEntryBtn.addEventListener('click', () => {
