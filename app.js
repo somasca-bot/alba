@@ -365,10 +365,7 @@ document.getElementById('saveEntryBtn').addEventListener('click', () => {
   state.entries[state.selectedDate] = { start, end, wage, minutes, gross };
   saveEntries();
   renderCalendar();
-
-  const [ky, km, kd] = state.selectedDate.split('-').map(Number);
-  deleteEntryBtn.classList.remove('hidden');
-  updateReportBlock(ky, km - 1, kd);
+  entryModal.classList.add('hidden');
 });
 
 deleteEntryBtn.addEventListener('click', () => {
