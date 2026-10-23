@@ -55,6 +55,10 @@ function dateKey(y, m, d) {
   return `${y}-${pad2(m + 1)}-${pad2(d)}`;
 }
 
+function isValidTime(str) {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(str);
+}
+
 function minutesBetween(start, end) {
   const [sh, sm] = start.split(':').map(Number);
   const [eh, em] = end.split(':').map(Number);
@@ -306,7 +310,7 @@ copyReportBtn.addEventListener('click', () => {
 function updatePreview() {
   const start = startTimeInput.value;
   const end = endTimeInput.value;
-  if (!start || !end) {
+  if (!isValidTime(start) || !isValidTime(end)) {
     entryPreview.textContent = '시작/종료 시간을 입력하세요';
     return;
   }
@@ -316,8 +320,34 @@ function updatePreview() {
   entryPreview.textContent = `${formatHM(minutes)} · 시급 ${formatWon(wage)} · ${formatWon(gross)}`;
 }
 
-startTimeInput.addEventListener('input', updatePreview);
-endTimeInput.addEventListener('input', updatePreview);
+function digitsOnly(str) {
+  return str.replace(/\D/g, '').slice(0, 4);
+}
+
+function maskTimeInput(e) {
+  const input = e.target;
+  const digits = digitsOnly(input.value);
+  input.value = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+  updatePreview();
+}
+
+function normalizeTimeInput(e) {
+  const input = e.target;
+  const digits = digitsOnly(input.value);
+  if (!digits) { input.value = ''; updatePreview(); return; }
+  let h = parseInt(digits.slice(0, 2), 10) || 0;
+  let m = digits.length > 2 ? (parseInt(digits.slice(2, 4), 10) || 0) : 0;
+  if (h > 23) h = 23;
+  if (m > 59) m = 59;
+  input.value = `${pad2(h)}:${pad2(m)}`;
+  updatePreview();
+}
+
+[startTimeInput, endTimeInput].forEach((el) => {
+  el.addEventListener('input', maskTimeInput);
+  el.addEventListener('blur', normalizeTimeInput);
+  el.addEventListener('focus', () => el.select());
+});
 
 document.getElementById('cancelEntryBtn').addEventListener('click', () => {
   entryModal.classList.add('hidden');
@@ -326,7 +356,7 @@ document.getElementById('cancelEntryBtn').addEventListener('click', () => {
 document.getElementById('saveEntryBtn').addEventListener('click', () => {
   const start = startTimeInput.value;
   const end = endTimeInput.value;
-  if (!start || !end) return;
+  if (!isValidTime(start) || !isValidTime(end)) return;
 
   const minutes = minutesBetween(start, end);
   const wage = getDefaultWage();
